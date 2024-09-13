@@ -32,6 +32,7 @@ const token1 = jwt.sign(payload1 , JWT_SECRET , {expiresIn : '1h'});
 app.use(express.json());
 
 //on intercepte la requête envoyé depuis le react et renvoie si c'est bon
+//Page CONNEXION
 app.post("/3000/Connexion" , (req ,res) => {
   const dataadmin = req.body
   console.log(dataadmin);
@@ -43,7 +44,7 @@ app.post("/3000/Connexion" , (req ,res) => {
   
 })
 
-
+//PAGE SERVICE
 app.get("/3000/Services" , (req,res) => {
   connection.query('SELECT * FROM service', (err, result) => {
     if(!err) {
@@ -53,6 +54,27 @@ app.get("/3000/Services" , (req,res) => {
     }
   })
 })
+
+//PAGE ADMINS
+app.post("/3000/Admins" , (req,res) => {
+  const { imageajoutservice, nomajoutservice, descriptionajoutservice } = req.body;
+
+  const query = `INSERT INTO service (image_service, nom, description) VALUES (?,?,?)`;
+  connection.query(query, [imageajoutservice, nomajoutservice, descriptionajoutservice] ,
+    (err ,result) => {
+      if(!err) {
+        return res.json(result);
+      }else{
+        res.status(404).send("Error lors des chargemement de valeur");
+      }
+    }
+   )})
+
+
+
+
+
+
 
 
 
