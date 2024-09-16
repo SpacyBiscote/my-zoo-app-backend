@@ -31,7 +31,7 @@ const token1 = jwt.sign(payload1 , JWT_SECRET , {expiresIn : '1h'});
 //Travail sur les middlewares
 app.use(express.json());
 
-//on intercepte la requête envoyé depuis le react et renvoie si c'est bon
+
 //Page CONNEXION
 app.post("/3000/Connexion" , (req ,res) => {
   const dataadmin = req.body
@@ -70,12 +70,46 @@ app.post("/3000/Admins" , (req,res) => {
     }
    )})
 
+ //page Habitat 
+ app.get("/3000/Housing" , (req,res) => {
+  connection.query('SELECT * FROM habitat' , (err , result) => {
+    if(!err){
+      return res.json(result);
+    }else{
+      res.status(404).send("Error lors des changements de valeur");
+    }
+  })
+ })
+ 
+ app.get("/3000/Housing/${habitatId}/animals" , (req,res) => {
+  connection.query('SELECT * FROM animal' , (err , result) => {
+    if(!err){
+      return res.json(result);
+    }else{
+      res.status(404).send("Error lors des changements de valeur");
+    }
+  })
+ })
 
 
 
+ //PAGE HOME 
 
+ app.post ("/3000" , (req,res) => {
+  const {pseudo , avis} = req.body
 
+  const query = `INSERT INTO avis (pseudo , commentaire ) VALUES (?,?)`;
 
+  connection.query(query , [pseudo , avis],
+    (err ,result) => {
+      if(!err) {
+        return res.json(result);
+      }else{
+        res.status(404).send("Error lors des chargemement de valeur");
+      }
+    }
+  )
+ })
 
 
 //redirection vers la page admin avec react router 
