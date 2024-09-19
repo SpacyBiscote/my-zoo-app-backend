@@ -70,7 +70,7 @@ app.get("/3000/Services" , (req,res) => {
 
 //PAGE ADMINS
 
-//service
+// onglet service
 app.post("/3000/Admins/service" , (req,res) => {
   const { imageajoutservice, nomajoutservice, descriptionajoutservice } = req.body;
   const query = `INSERT INTO service (image_service, nom, description) VALUES (?,?,?)`;
@@ -116,7 +116,7 @@ app.post("/3000/Admins/service" , (req,res) => {
       }
     )
   })
-//Habitat
+// onglet Habitat
 app.post("/3000/Admins/habitat" , (req,res) => {
   const { imageajouthabitat, nomajouthabitat, descriptionajouthabitat } = req.body;
   const query = 'INSERT INTO habitat (image_habitat, nom, description) VALUES (?,?,?)';
@@ -132,9 +132,9 @@ app.post("/3000/Admins/habitat" , (req,res) => {
 
    app.delete ("/3000/Admins/habitat" , (req , res) => {
     const {supprimhabitat } = req.body;
-    if (!supprimhabitat) {
+    /*if (!supprimhabitat) {
       return res.status(400).send("Le champ supprimhabitat est requis");
-  }
+  }*/
     const query = 'DELETE FROM habitat WHERE nom = ?';
     connection.query(query , [supprimhabitat], 
       (err,result) => {
@@ -162,6 +162,68 @@ app.post("/3000/Admins/habitat" , (req,res) => {
       }
     )
   })
+
+//Onglet animal
+ app.post("/3000/Admins/animaux" , (req,res) => {
+  const { imageajoutanimal, nomajoutanimal, disposeajoutanimal, habitatajoutanimal} = req.body;
+  const query = 'INSERT INTO animal (animal_image, prenom, dispose , detient) VALUES (?,?,?)';
+  connection.query(query, [imageajoutanimal, nomajoutanimal, disposeajoutanimal, habitatajoutanimal] ,
+    (err ,result) => {
+      if(!err) {
+        return res.json(result);
+      }else{
+        res.status(404).send("Error lors des chargemement de valeur");
+      }
+    }
+   )})
+ 
+   app.delete ("/3000/Admins/animaux" , (req , res) => {
+    const {supprimanimal } = req.body;
+    const query = 'DELETE FROM animal WHERE nom = ?';
+    connection.query(query , [supprimanimal], 
+      (err,result) => {
+        if (!err) {
+          if (result.affectedRows > 0) {
+              return res.json({ message: "animal supprimé avec succès", result });
+          } else {
+              return res.status(404).send("animal non trouvé");
+          }
+      }
+    })
+  })
+
+  app.put("/3000/Admins/animaux" , (req,res) => {
+    const {anciennomanimal,nommodifanimal, imagemodifanimal, disposemodifanimal,habitatmodifanimal } = req.body;
+    const query = 'UPDATE animal SET nom = ? , animal_image = ?, prenom = ? , dispose = ? , detient = ?  WHERE nom = ?' ; 
+    console.log(req.body)
+    connection.query(query , [anciennomanimal,nommodifanimal, imagemodifanimal, disposemodifanimal,habitatmodifanimal],
+      (err , result) => {
+        if(!err) {
+          return res.json(result);
+        }else{
+          res.status(404).send("Error lors des chargemement de valeur");
+        }
+      }
+    )
+  })
+
+
+   //AJOUT User
+   app.post("/3000/Admins/users" , (req,res) => {
+    const {emailajoutuser ,passwordajoutuser,roleuser } =req.body;
+    const query = 'INSERT INTO user (email , password , possede ) VALUES (?,?,?)';
+    connection.query(query , [emailajoutuser ,passwordajoutuser,roleuser ],
+      (err,result) => {
+        if(!err) {
+          return res.json(result);
+        }else{
+          res.status(404).send("Error lors des chargemement de valeur");
+        }
+      }
+    )
+   })
+
+
 
  //page Habitat 
  app.get("/3000/Housing" , (req,res) => {
