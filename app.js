@@ -22,9 +22,7 @@ const admin = {
 
 const JWT_SECRET = 'secretadmin@key';
 
-const payload1 = {email : "admin@gmail", role :"admin"};
 
-const token1 = jwt.sign(payload1 , JWT_SECRET , {expiresIn : '1h'}); 
 
 
 
@@ -32,17 +30,32 @@ const token1 = jwt.sign(payload1 , JWT_SECRET , {expiresIn : '1h'});
 app.use(express.json());
 
 
-//Page CONNEXION
-app.post("/3000/Connexion" , (req ,res) => {
-  const dataadmin = req.body
-  console.log(dataadmin);
-  if(req.body.email === admin.email && req.body.password === admin.password ) {
-    return res.json(token1);
-  } else {
-    return res.send("erreur de connexion") ;
- }
+
+
+app.post('/3000/Connexion', (req, res) => {
+  const { email, password } = req.body;
+
   
-})
+  const query = 'SELECT * FROM utilisateur WHERE email = ? AND password = ?';
+  connection.query(query, [email, password], (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: 'Erreur serveur' });
+    }
+
+    if (results.length > 0) {
+      const user = results[0];
+      if (user.email === 'admin@gmail.com' && user.password === 'admin12sdk') {
+        const payload = { email: user.email, role: 'admin' };
+        const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' });
+        return res.json({ token });
+      } else {
+        return res.status(401).json({ error: 'Accès non autorisé' });
+      }
+    } else {
+      return res.status(401).json({ error: 'Email ou mot de passe incorrect' });
+    }
+  });
+});
 
 //PAGE SERVICE
 app.get("/3000/Services" , (req,res) => {
@@ -56,9 +69,10 @@ app.get("/3000/Services" , (req,res) => {
 })
 
 //PAGE ADMINS
-app.post("/3000/Admins" , (req,res) => {
-  const { imageajoutservice, nomajoutservice, descriptionajoutservice } = req.body;
 
+//service
+app.post("/3000/Admins/service" , (req,res) => {
+  const { imageajoutservice, nomajoutservice, descriptionajoutservice } = req.body;
   const query = `INSERT INTO service (image_service, nom, description) VALUES (?,?,?)`;
   connection.query(query, [imageajoutservice, nomajoutservice, descriptionajoutservice] ,
     (err ,result) => {
@@ -69,6 +83,85 @@ app.post("/3000/Admins" , (req,res) => {
       }
     }
    )})
+
+  app.delete ("/3000/Admins/service" , (req , res) => {
+    const {supprimservice} = req.body;
+    if (!supprimservice) {
+      return res.status(400).send("Le champ supprimservice est requis");
+  }
+    const query = 'DELETE FROM service WHERE nom = ?';
+    connection.query(query , [supprimservice], 
+      (err,result) => {
+        if (!err) {
+          if (result.affectedRows > 0) {
+              return res.json({ message: "Service supprimé avec succès", result });
+          } else {
+              return res.status(404).send("Service non trouvé");
+          }
+      }
+    })
+  })
+
+  app.put("/3000/Admins/service" , (req,res) => {
+    const {nommodifservice, imagemodifservice , descriptionmodifservice,anciennom} = req.body;
+    const query = 'UPDATE service SET nom = ? , image_service = ?, description = ? WHERE nom = ?' ; 
+
+    connection.query(query , [nommodifservice, imagemodifservice , descriptionmodifservice, anciennom],
+      (err , result) => {
+        if(!err) {
+          return res.json(result);
+        }else{
+          res.status(404).send("Error lors des chargemement de valeur");
+        }
+      }
+    )
+  })
+//Habitat
+app.post("/3000/Admins/habitat" , (req,res) => {
+  const { imageajouthabitat, nomajouthabitat, descriptionajouthabitat } = req.body;
+  const query = 'INSERT INTO habitat (image_habitat, nom, description) VALUES (?,?,?)';
+  connection.query(query, [imageajouthabitat, nomajouthabitat, descriptionajouthabitat] ,
+    (err ,result) => {
+      if(!err) {
+        return res.json(result);
+      }else{
+        res.status(404).send("Error lors des chargemement de valeur");
+      }
+    }
+   )})
+
+   app.delete ("/3000/Admins/habitat" , (req , res) => {
+    const {supprimhabitat } = req.body;
+    if (!supprimhabitat) {
+      return res.status(400).send("Le champ supprimhabitat est requis");
+  }
+    const query = 'DELETE FROM habitat WHERE nom = ?';
+    connection.query(query , [supprimhabitat], 
+      (err,result) => {
+        if (!err) {
+          if (result.affectedRows > 0) {
+              return res.json({ message: "Habitat supprimé avec succès", result });
+          } else {
+              return res.status(404).send("Habitat non trouvé");
+          }
+      }
+    })
+  })
+
+  app.put("/3000/Admins/habitat" , (req,res) => {
+    const {imagemodifhabitat,nommodifhabitat, descriptionmodifhabitat, anciennomhabitat} = req.body;
+    const query = 'UPDATE habitat SET nom = ? , image_habitat = ?, description = ? WHERE nom = ?' ; 
+
+    connection.query(query , [imagemodifhabitat,nommodifhabitat, descriptionmodifhabitat, anciennomhabitat],
+      (err , result) => {
+        if(!err) {
+          return res.json(result);
+        }else{
+          res.status(404).send("Error lors des chargemement de valeur");
+        }
+      }
+    )
+  })
 
  //page Habitat 
  app.get("/3000/Housing" , (req,res) => {
@@ -81,7 +174,7 @@ app.post("/3000/Admins" , (req,res) => {
   })
  })
  
- app.get("/3000/Housing/${habitatId}/animals" , (req,res) => {
+ app.get("/3000/Housing/animaux" , (req,res) => {
   connection.query('SELECT * FROM animal' , (err , result) => {
     if(!err){
       return res.json(result);
