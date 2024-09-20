@@ -30,8 +30,6 @@ const JWT_SECRET = 'secretadmin@key';
 app.use(express.json());
 
 
-
-
 app.post('/3000/Connexion', (req, res) => {
   const { email, password } = req.body;
 
@@ -293,10 +291,35 @@ app.put("/3000/Employe" , (req,res) => {
   )
 })
 
-//redirection vers la page admin avec react router 
-app.use("/admin" , (req, res , next) => 
-    res.send("Vous êtes connecté en tant qu'admin")
-)
+//Page vétérinaire
+app.put("/3000/Veto" , (req,res) => {
+  const {idanimal3 ,ajoutétat , typenourriture  , grammage  ,  idanimal4} = req.body;
+  const query = 'UPDATE animal SET animal_id = ?, etat= ? , 	typenourriture= ? , grammage = ?  WHERE animal_id = ?' ; 
+
+  connection.query(query , [idanimal3 ,ajoutétat , typenourriture  , grammage  ,  idanimal4],
+    (err , result) => {
+      if(!err) {
+        return res.json(result);
+      }else{
+        res.status(404).send("Error lors des chargemement de valeur");
+      }
+    }
+  )
+})
+
+app.get('/3000/Veto', (req, res) => {
+  const query = 'SELECT Consonouriture FROM animal'; // Requête pour sélectionner uniquement la colonne "grammage"
+
+  connection.query(query, (err, results) => {
+      if (err) {
+          return res.status(500).json({ error: 'Erreur lors de la récupération des données' });
+      }
+      res.json(results); // Retourner les résultats en JSON
+  });
+});
+
+
+
 
 app.get("/" , (req,res) => res.send("Hello express 6")) 
 
