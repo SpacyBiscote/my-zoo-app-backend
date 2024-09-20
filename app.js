@@ -265,7 +265,33 @@ app.post("/3000/Admins/habitat" , (req,res) => {
     }
   )
  })
+//page employé
 
+app.get("/3000/Employe" , (req,res) => {
+  connection.query('SELECT * FROM avis' , (err , result) => {
+    if(!err){
+      return res.json(result);
+    }else{
+      console.log(err);  
+      res.status(404).send("Error lors des changements de valeur");
+    }
+  })
+})
+
+app.put("/3000/Employe" , (req,res) => {
+  const {idanimal, ajoutgrammage,ajoutdateheure , idanimal2 } = req.body;
+  const query = 'UPDATE animal SET animal_id = ?, Consonouriture = ? , date_heure = ? WHERE animal_id = ?' ; 
+
+  connection.query(query , [ajoutgrammage,ajoutdateheure ,idanimal, idanimal2],
+    (err , result) => {
+      if(!err) {
+        return res.json(result);
+      }else{
+        res.status(404).send("Error lors des chargemement de valeur");
+      }
+    }
+  )
+})
 
 //redirection vers la page admin avec react router 
 app.use("/admin" , (req, res , next) => 
